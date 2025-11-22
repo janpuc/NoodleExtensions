@@ -15,18 +15,15 @@ using namespace UnityEngine;
 using namespace System;
 
 extern BeatmapObjectAssociatedData* noteUpdateAD;
-extern TracksAD::TracksVector noteTrackKeys;
+extern TracksAD::TracksVector noteTracks;
 
 static NEVector::Vector3 DefinitePositionTranspile(NEVector::Vector3 original, NoteFloorMovement* noteFloorMovement) {
   if (!noteUpdateAD) {
     return original;
   }
 
-  auto& beatmapAD = TracksAD::getBeatmapAD(NECaches::customBeatmapData->customData);
-  auto tracks = beatmapAD.getTracks(noteTrackKeys);
-
   std::optional<NEVector::Vector3> position =
-      AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, tracks, 0);
+      AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, 0);
   if (!position.has_value()) {
     return original;
   }

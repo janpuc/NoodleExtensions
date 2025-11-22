@@ -41,9 +41,8 @@ struct ::il2cpp_utils::il2cpp_type_check::MetadataGetter<
 
 static constexpr void AddToTrack(CustomJSONData::CustomNoteData* noteData, GameObject* gameObject) {
   if (noteData->customData && noteData->customData->value) {
-    auto const& trackKeys = TracksAD::getAD(noteData->customData).tracks;
-    auto& beatmapAD = TracksAD::getBeatmapAD(NECaches::customBeatmapData->customData);
-    auto tracks = beatmapAD.getTracks(trackKeys);
+    auto const& tracks = TracksAD::getAD(noteData->customData).tracks;
+
 
     if (!tracks.empty()) {
       for (auto& track : tracks) {

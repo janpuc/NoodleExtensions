@@ -16,7 +16,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 extern BeatmapObjectAssociatedData* noteUpdateAD;
-extern TracksAD::TracksVector noteTrackKeys;
+extern TracksAD::TracksVector noteTracks;
 
 float noteTimeAdjust(float original, float jumpDuration);
 
@@ -120,8 +120,7 @@ MAKE_HOOK_MATCH(NoteJump_ManualUpdate, &NoteJump::ManualUpdate, Vector3, NoteJum
 
   if (noteUpdateAD) {
     auto& noteBeatmapAD = TracksAD::getBeatmapAD(NECaches::customBeatmapData->customData);
-    auto noteTracks = noteBeatmapAD.getTracks(noteTrackKeys);
-    
+
     std::optional<NEVector::Vector3> position =
         AnimationHelper::GetDefinitePositionOffset(noteUpdateAD->animationData, noteTracks, normalTime);
     if (position.has_value()) {

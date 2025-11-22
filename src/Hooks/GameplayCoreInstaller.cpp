@@ -38,8 +38,8 @@ MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, 
   InstallBindings(self);
 
   NECaches::GameplayCoreContainer = self->Container;
-  NECaches::customBeatmapData =
-      il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(self->_sceneSetupData->get_transformedBeatmapData());
+  // NECaches::customBeatmapData =
+  //     il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(self->_sceneSetupData->get_transformedBeatmapData());
   
 
   NECaches::JumpOffsetYProvider = self->Container->Resolve<GlobalNamespace::IJumpOffsetYProvider*>();
