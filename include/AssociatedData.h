@@ -69,6 +69,7 @@ struct ObjectCustomData {
 struct BeatmapObjectAssociatedData {
   BeatmapObjectAssociatedData() = default;
   BeatmapObjectAssociatedData(BeatmapObjectAssociatedData&&) = default;
+  [[deprecated("Use default move semantics")]]
   BeatmapObjectAssociatedData(BeatmapObjectAssociatedData const&) = default;
 
   // Set in NotesInTimeRowProcessor.ProcessAllNotesInTimeRow
@@ -82,6 +83,7 @@ struct BeatmapObjectAssociatedData {
   NEVector::Vector3 jumpEndPos;
   NEVector::Vector3 noteOffset;
   NEVector::Vector3 boundsSize; // obstacles
+  NEVector::Vector3 internalScale;
   float endRotation;
 
   float xOffset;

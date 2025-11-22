@@ -119,8 +119,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   obstacleCache.dissolveEnabled = false;
 
   auto const setBounds = [&ad, &self]() constexpr {
-    auto const& cuttable = ad.objectData.uninteractable;
-    if (cuttable && *cuttable) {
+    if (ad.objectData.uninteractable.value_or(false)) {
       self->bounds.set_size(NEVector::Vector3::zero());
     } else {
       getActiveObstacles()->Add(self);
@@ -153,8 +152,11 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
 
   auto scale = NEVector::Vector3::one();
   if (ad.objectData.scale) {
-    scale = NEVector::Vector3(ad.objectData.scale->at(0).value_or(1.0f), ad.objectData.scale->at(1).value_or(1.0f), ad.objectData.scale->at(2).value_or(1.0f));
+    scale.x = ad.objectData.scale->at(0).value_or(1);
+    scale.y = ad.objectData.scale->at(1).value_or(1);
+    scale.z = ad.objectData.scale->at(2).value_or(1);
   }
+  ad.internalScale = scale;
   transform->set_localScale(scale);
 
   auto const& scale2 = ad.objectData.scale;
@@ -344,7 +346,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
   }
 
   if (offset.scaleOffset.has_value()) {
-    transform->set_localScale(*offset.scaleOffset);
+    transform->set_localScale(*offset.scaleOffset * ad.internalScale);
   }
 
   auto& obstacleCache = NECaches::getObstacleCache(self);
