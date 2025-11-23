@@ -16,7 +16,8 @@ using namespace GlobalNamespace;
 float SpawnDataHelper::HighestJumpPosYForLineLayer(float lineLayer)
 {
     // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
-    return (0.525f * lineLayer) + 0.858333f + NECaches::JumpOffsetYProvider->get_jumpOffsetY();
+
+    return (0.875f * lineLayer) + 0.639583f + NECaches::JumpOffsetYProvider->jumpOffsetY;
 }
 
 float SpawnDataHelper::GetGravityBase(float noteLineLayer, float beforeJumpLineLayer)
