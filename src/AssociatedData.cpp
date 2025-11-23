@@ -22,25 +22,33 @@ AnimationObjectData::AnimationObjectData(BeatmapAssociatedData& beatmapAD, rapid
     : parsed(true) {
   position =
       TryGetPointData(beatmapAD, animation,
-                      v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::OFFSET_POSITION, Tracks::ffi::WrapBaseValueType::Vec3);
+                      v2 ? NoodleExtensions::Constants::V2_POSITION : NoodleExtensions::Constants::OFFSET_POSITION,
+                      Tracks::ffi::WrapBaseValueType::Vec3);
   rotation =
       TryGetPointData(beatmapAD, animation,
-                      v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::OFFSET_ROTATION, Tracks::ffi::WrapBaseValueType::Quat);
+                      v2 ? NoodleExtensions::Constants::V2_ROTATION : NoodleExtensions::Constants::OFFSET_ROTATION,
+                      Tracks::ffi::WrapBaseValueType::Quat);
   scale = TryGetPointData(beatmapAD, animation,
-                          v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::SCALE, Tracks::ffi::WrapBaseValueType::Vec3);
-  localRotation = TryGetPointData(beatmapAD, animation,
-                                  v2 ? NoodleExtensions::Constants::V2_LOCAL_ROTATION
-                                     : NoodleExtensions::Constants::LOCAL_ROTATION, Tracks::ffi::WrapBaseValueType::Quat);
+                          v2 ? NoodleExtensions::Constants::V2_SCALE : NoodleExtensions::Constants::SCALE,
+                          Tracks::ffi::WrapBaseValueType::Vec3);
+  localRotation =
+      TryGetPointData(beatmapAD, animation,
+                      v2 ? NoodleExtensions::Constants::V2_LOCAL_ROTATION : NoodleExtensions::Constants::LOCAL_ROTATION,
+                      Tracks::ffi::WrapBaseValueType::Quat);
   dissolve = TryGetPointData(beatmapAD, animation,
-                             v2 ? NoodleExtensions::Constants::V2_DISSOLVE : NoodleExtensions::Constants::DISSOLVE, Tracks::ffi::WrapBaseValueType::Float);
-  dissolveArrow = TryGetPointData(beatmapAD, animation,
-                                  v2 ? NoodleExtensions::Constants::V2_DISSOLVE_ARROW
-                                     : NoodleExtensions::Constants::DISSOLVE_ARROW, Tracks::ffi::WrapBaseValueType::Float);
+                             v2 ? NoodleExtensions::Constants::V2_DISSOLVE : NoodleExtensions::Constants::DISSOLVE,
+                             Tracks::ffi::WrapBaseValueType::Float);
+  dissolveArrow =
+      TryGetPointData(beatmapAD, animation,
+                      v2 ? NoodleExtensions::Constants::V2_DISSOLVE_ARROW : NoodleExtensions::Constants::DISSOLVE_ARROW,
+                      Tracks::ffi::WrapBaseValueType::Float);
   cuttable = TryGetPointData(beatmapAD, animation,
-                             v2 ? NoodleExtensions::Constants::V2_CUTTABLE : NoodleExtensions::Constants::INTERACTABLE, Tracks::ffi::WrapBaseValueType::Float);
+                             v2 ? NoodleExtensions::Constants::V2_CUTTABLE : NoodleExtensions::Constants::INTERACTABLE,
+                             Tracks::ffi::WrapBaseValueType::Float);
   definitePosition = TryGetPointData(beatmapAD, animation,
                                      v2 ? NoodleExtensions::Constants::V2_DEFINITE_POSITION
-                                        : NoodleExtensions::Constants::DEFINITE_POSITION, Tracks::ffi::WrapBaseValueType::Vec3);
+                                        : NoodleExtensions::Constants::DEFINITE_POSITION,
+                                     Tracks::ffi::WrapBaseValueType::Vec3);
 }
 
 ObjectCustomData::ObjectCustomData(rapidjson::Value const& customData, CustomJSONData::CustomNoteData* noteData,
@@ -95,9 +103,24 @@ ObjectCustomData::ObjectCustomData(rapidjson::Value const& customData, CustomJSO
   disableNoteLook = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_NOTE_LOOK_DISABLE
                                                             : NoodleExtensions::Constants::NOTE_LOOK_DISABLE)
                         .value_or(false);
-  scale = NEJSON::ReadOptionalScale(customData, v2 ? NoodleExtensions::Constants::V2_SCALE
-                                                   : NoodleExtensions::Constants::OBSTACLE_SIZE);
+  auto legacyScaleArray = NEJSON::ReadOptionalScale(customData, v2 ? NoodleExtensions::Constants::V2_SCALE
+                                                                   : NoodleExtensions::Constants::OBSTACLE_SIZE);
 
+  if (legacyScaleArray) {
+    width = legacyScaleArray->at(0);
+    height = legacyScaleArray->at(1);
+    length = legacyScaleArray->at(2);
+  }
+
+  if (!v2) {
+    auto scale = NEJSON::ReadOptionalScale(customData, NoodleExtensions::Constants::SCALE);
+
+    if (scale) {
+      scaleX = scale->at(0);
+      scaleY = scale->at(1);
+      scaleZ = scale->at(2);
+    }
+  }
   link = NEJSON::ReadOptionalString(customData, NoodleExtensions::Constants::LINK);
 
   // TODO: MIRROR WIDTH AND OBSTACLE START X

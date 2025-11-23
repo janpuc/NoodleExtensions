@@ -45,9 +45,8 @@ template <typename T> constexpr std::optional<T> operator*(std::optional<T> cons
   }
   if (b) {
     return b;
-  } 
-    return std::nullopt;
-  
+  }
+  return std::nullopt;
 }
 
 std::optional<NEVector::Vector3> AnimationHelper::GetDefinitePositionOffset(AnimationObjectData const& animationData,

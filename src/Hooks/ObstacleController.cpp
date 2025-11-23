@@ -166,13 +166,8 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     transform->localRotation = NEVector::Quaternion(self->_worldRotation) * localRotation;
   }
 
-
-  auto scale = NEVector::Vector3::one();
-  if (ad.objectData.scale) {
-    scale.x = ad.objectData.scale->at(0).value_or(1);
-    scale.y = ad.objectData.scale->at(1).value_or(1);
-    scale.z = ad.objectData.scale->at(2).value_or(1);
-  }
+  auto scale = NEVector::Vector3(ad.objectData.scaleX.value_or(1.0f), ad.objectData.scaleY.value_or(1.0f),
+                                 ad.objectData.scaleZ.value_or(1.0f));
   ad.internalScale = scale;
   transform->set_localScale(scale);
 
@@ -183,16 +178,13 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   // ad.jumpEndPos = self->_endPos;
   ad.localRotation = ad.objectData.localRotation.value_or(NEVector::Quaternion::identity());
 
-  auto const& noodleScale = ad.objectData.scale;
+  // GetCustomWidth transpiler
+  if (ad.objectData.width) {
+    self->_width = *ad.objectData.width * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
+  }
 
-  if (noodleScale) {
-    if (noodleScale->at(0)) {
-      self->_width = *noodleScale->at(0) * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
-    }
-
-    if (noodleScale->at(2)) {
-      self->_length = *noodleScale->at(2) * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
-    }
+  if (ad.objectData.length) {
+    self->_length = *ad.objectData.length * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
   }
 
   // Note offset is jumpEndPosition + spawn move offset (z removed), matching C# LATEST
@@ -497,10 +489,10 @@ MAKE_HOOK_MATCH(ObstacleController_GetObstacleLength, &ObstacleController::GetOb
   if (!obstacleData->customData->value) return ObstacleController_GetObstacleLength(self);
 
   BeatmapObjectAssociatedData const& ad = getAD(obstacleData->customData);
-  auto const& scaleOpt = ad.objectData.scale;
 
-  if (scaleOpt && scaleOpt->at(2)) {
-    return *scaleOpt->at(2) * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
+
+  if (ad.objectData.length) {
+    return *ad.objectData.length * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
   }
 
   return ObstacleController_GetObstacleLength(self);

@@ -99,17 +99,17 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
   Vector3 obstacleOffset = SpawnDataHelper::GetObstacleOffset(self, lineIndex, lineLayer);
   obstacleOffset.y += NECaches::JumpOffsetYProvider->jumpOffsetY;
 
-  auto const& scale = ad.objectData.scale;
-  std::optional<float> height = scale && scale->at(1) ? scale->at(1) : std::nullopt;
-  std::optional<float> width = scale && scale->at(0) ? scale->at(0) : std::nullopt;
+
+  std::optional<float> height = ad.objectData.height;
+  std::optional<float> width = ad.objectData.width; 
 
   float obstacleHeight;
   if (height.has_value()) {
-    obstacleHeight = height.value() * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
+    obstacleHeight = height.value() * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::get_layerHeight();
   } else {
     // _topObstaclePosY =/= _obstacleTopPosY
     obstacleHeight =
-        std::min(obstacleData->height * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance,
+        std::min(obstacleData->height * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::get_layerHeight(),
                  self->_obstacleTopPosY - obstacleOffset.y);
   }
 

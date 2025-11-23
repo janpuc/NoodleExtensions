@@ -24,8 +24,8 @@ MAKE_HOOK_MATCH(ObstacleData_Mirror, &ObstacleData::Mirror, void, ObstacleData* 
 
   std::optional<float> scaleX;
 
-  if (ad.objectData.scale) {
-    scaleX = ad.objectData.scale.value()[0];
+  if (ad.objectData.width) {
+    scaleX = ad.objectData.width;
 
     if (scaleX) width = *scaleX;
   }

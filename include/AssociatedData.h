@@ -59,7 +59,15 @@ struct ObjectCustomData {
   std::optional<std::string> link;
 
   // obstacles [width, height, length]
-  std::optional<std::array<std::optional<float>, 3>> scale;
+  // legacy obstacle scaling
+  std::optional<float> width;
+  std::optional<float> height;
+  std::optional<float> length;
+
+  // new obstacle scaling
+  std::optional<float> scaleX;
+  std::optional<float> scaleY;
+  std::optional<float> scaleZ;
 
   ObjectCustomData() = default;
   ObjectCustomData(rapidjson::Value const& customData, CustomJSONData::CustomNoteData* noteData,
