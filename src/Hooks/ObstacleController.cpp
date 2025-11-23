@@ -454,7 +454,7 @@ MAKE_HOOK_MATCH(ObstacleController_GetPosForTime, &ObstacleController::GetPosFor
   float jumpDuration = self->_variableMovementDataProvider->jumpDuration;
   float obstacleDuration = self->_obstacleData->duration;
 
-  float jumpTime = (time - moveDuration) / (jumpDuration + self->_obstacleDuration);
+  float jumpTime = (time - moveDuration) / (jumpDuration + obstacleDuration);
   jumpTime = std::clamp(jumpTime, 0.0f, 1.0f);
 
   // auto context = TracksAD::getBeatmapAD(NECaches::customBeatmapData->customData).internal_tracks_context;
