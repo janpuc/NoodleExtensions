@@ -111,7 +111,7 @@ void PlayerTrack::AssignTrack(TrackW track, PlayerTrackObject object) {
   auto& playerTrack = PlayerTrack::playerTracks[object];
 
   if (playerTrack && playerTrack->track) {
-    //playerTrack->track.RemoveGameObject(playerTrack->get_gameObject());
+    playerTrack->track.UnregisterGameObject(playerTrack->get_gameObject());
   }
 
   // Init

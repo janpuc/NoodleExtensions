@@ -27,7 +27,7 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Note_Despawn,
     if (!tracks.empty()) {
       auto go = noteController->get_gameObject();
       for (auto& track : tracks) {
-        //track->RemoveGameObject(go);
+        track.UnregisterGameObject(go);
       }
     }
   }
@@ -48,7 +48,7 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_Obstacle_Despawn,
     if (!tracks.empty()) {
       auto go = obstacleController->get_gameObject();
       for (auto& track : tracks) {
-        //track->RemoveGameObject(go);
+        track.UnregisterGameObject(go);
       }
     }
   }

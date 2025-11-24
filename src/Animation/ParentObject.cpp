@@ -7,7 +7,8 @@
 #include "Animation/AnimationHelper.h"
 #include "UnityEngine/GameObject.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
-#include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
+#include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
+#include "GlobalNamespace/StaticBeatmapObjectSpawnMovementData.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 
 #include "NECaches.h"
@@ -45,9 +46,6 @@ void ParentObject::UpdateData(bool force) {
     lastCheckedTime = TimeUnit();
   }
 
-  float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
-
-  auto const& properties = track.GetPropertiesMap();
   auto const rotation = track.GetPropertyNamed(PropertyNames::Rotation).GetQuat(lastCheckedTime);
   auto const localRotation = track.GetPropertyNamed(PropertyNames::LocalRotation).GetQuat(lastCheckedTime);
   auto const position = track.GetPropertyNamed(PropertyNames::Position).GetVec3(lastCheckedTime);
@@ -79,9 +77,8 @@ void ParentObject::UpdateDataOld(bool forced) {
   if (forced) {
     lastCheckedTime = TimeUnit();
   }
-  float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+  float noteLinesDistance = GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
 
-  auto const& properties = track.GetPropertiesMap();
   auto const rotation = track.GetPropertyNamed(PropertyNames::Rotation).GetQuat(lastCheckedTime);
   auto const localRotation = track.GetPropertyNamed(PropertyNames::LocalRotation).GetQuat(lastCheckedTime);
   auto const position = track.GetPropertyNamed(PropertyNames::Position).GetVec3(lastCheckedTime);
@@ -117,12 +114,10 @@ void ParentObject::UpdateDataOld(bool forced) {
 static void logTransform(Transform* transform, int hierarchy = 0) {
   if (hierarchy != 0) {
     std::string tab = std::string(hierarchy * 4, ' ');
-    NELogger::Logger.debug("{}{}Child: {} {}", hierarchy, tab.c_str(),
-                                transform->get_gameObject()->get_name(),
-                                transform->GetChildCount());
+    NELogger::Logger.debug("{}{}Child: {} {}", hierarchy, tab.c_str(), transform->get_gameObject()->get_name(),
+                           transform->GetChildCount());
   } else {
-    NELogger::Logger.debug("Self: {} {}", transform->get_gameObject()->get_name(),
-                                transform->GetChildCount());
+    NELogger::Logger.debug("Self: {} {}", transform->get_gameObject()->get_name(), transform->GetChildCount());
   }
   for (int i = 0; i < transform->GetChildCount(); i++) {
     auto childTransform = transform->GetChild(i);
@@ -144,6 +139,11 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
   instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
   Transform* transform = instance->origin;
+  NELogger::Logger.debug("Assigning ParentObject {} to [{}]", parentTrackEventData.parentTrack.GetName(),
+                         fmt::join(parentTrackEventData.childrenTracks |
+                                      std::views::transform([](auto& t) { return std::string(t.GetName()); }),
+                                   ", "));
+
   if (instance->track.v2) {
     if (parentTrackEventData.pos.has_value()) {
       instance->startPos = *parentTrackEventData.pos;
@@ -193,15 +193,26 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     }
 
     for (auto& parentObject : ParentController::parentObjects) {
-      //track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, parentObject };
-      //parentObject->childrenTracks.erase(track);
+      // track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, parentObject };
+      // parentObject->childrenTracks.erase(track);
+
+      // this code is ugly but whatever, keep the original above as a reference
+      track.RemoveGameObjectCallback(parentObject->gameObjectModificationCallbacks[track]);
+      parentObject->childrenTracks.erase(track);
     }
 
     for (auto& gameObject : track.GetGameObjects()) {
       instance->ParentToObject(get_transform(gameObject));
     }
-    //instance->childrenTracks.emplace(track);
-    //track.gameObjectModificationEvent += { &ParentObject::HandleGameObject, instance };
+    // instance->childrenTracks.emplace(track);
+    // track.gameObjectModificationEvent += { &ParentObject::HandleGameObject, instance };
+    instance->childrenTracks.emplace(track);
+    auto callback = track.RegisterGameObjectCallback([instance](UnityEngine::GameObject* go, bool added) {
+      NELogger::Logger.debug("ParentObject callback for track {} on game object {} (added: {})",
+                             instance->track.GetName(), go->get_name(), added);
+      instance->HandleGameObject(instance->track, go, !added);
+    });
+    instance->gameObjectModificationCallbacks[track] = callback;
   }
 
   ParentController::parentObjects.emplace_back(instance);
@@ -235,11 +246,11 @@ void ParentObject::HandleGameObject(TrackW track, UnityEngine::GameObject* go, b
 }
 
 ParentObject::~ParentObject() {
-  //for (auto& childTrack : childrenTracks) {
-    //childTrack->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, this };
+  // for (auto& childTrack : childrenTracks) {
+  // childTrack->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, this };
   //}
   // just in case
-  //track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, this };
+  // track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, this };
 }
 
 void ParentController::OnDestroy() {

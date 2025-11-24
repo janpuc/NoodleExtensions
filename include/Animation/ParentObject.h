@@ -25,10 +25,13 @@ private:
   bool worldPositionStays;
   TimeUnit lastCheckedTime;
 
+  // callbacks
+  std::unordered_map<TrackW, TrackW::CWrappedCallback> gameObjectModificationCallbacks;
+
 public:
   ~ParentObject();
 
-  //std::unordered_set<TrackW> childrenTracks;
+  std::unordered_set<TrackW> childrenTracks;
 
   void UpdateData(bool forced);
   void UpdateDataOld(bool forced);
