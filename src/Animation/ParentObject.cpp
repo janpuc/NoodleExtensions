@@ -147,7 +147,7 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
   if (instance->track.v2) {
     if (parentTrackEventData.pos.has_value()) {
       instance->startPos = *parentTrackEventData.pos;
-      transform->set_localPosition(instance->startPos * NECaches::get_noteLinesDistanceFast());
+      transform->set_localPosition(instance->startPos * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance);
     }
 
     if (parentTrackEventData.rot.has_value()) {
@@ -160,22 +160,22 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     if (parentTrackEventData.localRot.has_value()) {
       instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
       transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
-    } else {
-      if (parentTrackEventData.pos.has_value()) {
-        transform->set_position(instance->startPos);
-      } else if (parentTrackEventData.localPos.has_value()) {
-        transform->set_localPosition(instance->startPos);
-      }
+    }
+  } else {
+    if (parentTrackEventData.pos.has_value()) {
+      transform->set_position(instance->startPos);
+    } else if (parentTrackEventData.localPos.has_value()) {
+      transform->set_localPosition(instance->startPos);
+    }
 
-      if (parentTrackEventData.rot.has_value()) {
-        transform->set_localRotation(instance->startRot);
-      } else if (parentTrackEventData.localRot.has_value()) {
-        transform->set_localRotation(instance->startLocalRot);
-      }
+    if (parentTrackEventData.rot.has_value()) {
+      transform->set_localRotation(instance->startRot);
+    } else if (parentTrackEventData.localRot.has_value()) {
+      transform->set_localRotation(instance->startLocalRot);
+    }
 
-      if (parentTrackEventData.scale.has_value()) {
-        transform->set_localScale(instance->startScale);
-      }
+    if (parentTrackEventData.scale.has_value()) {
+      transform->set_localScale(instance->startScale);
     }
   }
 
