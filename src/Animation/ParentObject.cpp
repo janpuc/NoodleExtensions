@@ -1,5 +1,6 @@
 #include "Animation/ParentObject.h"
 
+#include "AssociatedData.h"
 #include "NELogger.h"
 #include "beatsaber-hook/shared/utils/il2cpp-type-check.hpp"
 
@@ -104,8 +105,8 @@ void ParentObject::UpdateDataOld(bool forced) {
     scaleVector = startScale * scale.value();
   }
 
-  origin->set_localPosition(positionVector);
   origin->set_localRotation(worldRotationQuaternion);
+  origin->set_localPosition(positionVector);
   origin->set_localScale(scaleVector);
 
   lastCheckedTime = getCurrentTime();
@@ -139,10 +140,10 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
   instance->worldPositionStays = parentTrackEventData.worldPositionStays;
 
   Transform* transform = instance->origin;
-  NELogger::Logger.debug("Assigning ParentObject {} to [{}]", parentTrackEventData.parentTrack.GetName(),
+  NELogger::Logger.debug("Assigning ParentObject {} to [{}] v2 {}", parentTrackEventData.parentTrack.GetName(),
                          fmt::join(parentTrackEventData.childrenTracks |
                                       std::views::transform([](auto& t) { return std::string(t.GetName()); }),
-                                   ", "));
+                                   ", "), parentTrackEventData.parentTrack.v2);
 
   if (instance->track.v2) {
     if (parentTrackEventData.pos.has_value()) {
@@ -160,6 +161,11 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     if (parentTrackEventData.localRot.has_value()) {
       instance->startLocalRot = instance->startRot * *parentTrackEventData.localRot;
       transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * instance->startLocalRot);
+    }
+
+    if (parentTrackEventData.scale.has_value()) {
+      instance->startScale = *parentTrackEventData.scale;
+      transform->set_localScale(instance->startScale);
     }
   } else {
     if (parentTrackEventData.pos.has_value()) {
@@ -179,10 +185,6 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
     }
   }
 
-  if (parentTrackEventData.scale.has_value()) {
-    instance->startScale = *parentTrackEventData.scale;
-    transform->set_localScale(instance->startScale);
-  }
 
   auto startTime = std::chrono::high_resolution_clock::now();
   parentTrackEventData.parentTrack.RegisterGameObject(parentGameObject);

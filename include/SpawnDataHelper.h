@@ -35,19 +35,14 @@ static inline float const kHalfJumpDistanceEpsilon = 0.001f;
 constexpr float CalculateHalfJumpDurationInBeats(float startHalfJumpDurationInBeats, float maxHalfJumpDistance,
                                                  float noteJumpMovementSpeed, float oneBeatDuration,
                                                  float noteJumpStartBeatOffset) {
-  float num = startHalfJumpDurationInBeats;
+  float num1 = startHalfJumpDurationInBeats;
   float num2 = noteJumpMovementSpeed * oneBeatDuration;
-  float num3 = num2 * num;
-  maxHalfJumpDistance -= 0.001f;
-  while (num3 > maxHalfJumpDistance) {
-    num /= 2.0f;
-    num3 = num2 * num;
-  }
-  num += noteJumpStartBeatOffset;
-  if (num < 0.25f) {
-    num = 0.25f;
-  }
-  return num;
+  float num3 = num2 * num1;
+  for (maxHalfJumpDistance -= 1.0f / 1000.0f; (double)num3 > (double)maxHalfJumpDistance; num3 = num2 * num1)
+    num1 /= 2.0f;
+  float jumpDurationInBeats = num1 + noteJumpStartBeatOffset;
+  if ((double)jumpDurationInBeats < 0.25) jumpDurationInBeats = 0.25f;
+  return jumpDurationInBeats;
 }
 
 constexpr float OneBeatDuration(float bpm) {
