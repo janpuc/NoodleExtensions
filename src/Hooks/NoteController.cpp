@@ -192,12 +192,22 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
     }
   }
 
+  auto scale = NEVector::Vector3(ad.objectData.scaleX.value_or(1.0f), ad.objectData.scaleY.value_or(1.0f),
+                                 ad.objectData.scaleZ.value_or(1.0f));
+  ad.internalScale = scale;
+  transform->set_localScale(scale);
+
   Vector3 moveStartPos = noteSpawnData->moveStartOffset;
   Vector3 moveEndPos = noteSpawnData->moveEndOffset;
   Vector3 jumpEndPos = noteSpawnData->jumpEndOffset;
   float jumpGravity =
       self->_noteMovement->_variableMovementDataProvider->CalculateCurrentNoteJumpGravity(noteSpawnData->gravityBase);
   float halfJumpDuration = self->_noteMovement->_variableMovementDataProvider->halfJumpDuration;
+
+  float zOffset = self->_noteMovement->_zOffset;
+  moveStartPos.z += zOffset;
+  moveEndPos.z += zOffset;
+  jumpEndPos.z += zOffset;
 
   ad.endRotation = endRotation;
   ad.moveStartPos = moveStartPos;
@@ -280,7 +290,7 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
   auto transform = self->get_transform();
 
   if (offset.scaleOffset.has_value()) {
-    transform->set_localScale(*offset.scaleOffset);
+    transform->set_localScale(*offset.scaleOffset * ad.internalScale);
   }
 
   if (offset.rotationOffset.has_value() || offset.localRotationOffset.has_value()) {
@@ -305,6 +315,8 @@ MAKE_HOOK_MATCH(NoteController_ManualUpdate, &NoteController::ManualUpdate, void
 
     transform->set_localRotation(worldRotationQuaternion);
   }
+
+  
 
   auto& noteCache = NECaches::getNoteCache(self);
 

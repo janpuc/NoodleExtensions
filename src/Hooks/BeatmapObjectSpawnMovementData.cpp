@@ -99,9 +99,8 @@ MAKE_HOOK_MATCH(GetObstacleSpawnData, &BeatmapObjectSpawnMovementData::GetObstac
   Vector3 obstacleOffset = SpawnDataHelper::GetObstacleOffset(self, lineIndex, lineLayer);
   obstacleOffset.y += NECaches::JumpOffsetYProvider->jumpOffsetY;
 
-
   std::optional<float> height = ad.objectData.height;
-  std::optional<float> width = ad.objectData.width; 
+  std::optional<float> width = ad.objectData.width;
 
   float obstacleHeight;
   if (height.has_value()) {
@@ -148,17 +147,16 @@ MAKE_HOOK_MATCH(GetJumpingNoteSpawnData, &BeatmapObjectSpawnMovementData::GetJum
   float lineLayer = ad.objectData.startY.value_or(noteData->noteLineLayer.value__);
   float const startLineLayer = ad.startNoteLineLayer;
 
-  Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(self, lineIndex, startLineLayer);
-
-  float gravity = SpawnDataHelper::GetGravityBase(lineLayer, gravityOverride ? lineLayer : startLineLayer);
-
   float offsetStartRow = flipLineIndex.value_or(lineIndex);
   float offsetStartHeight = gravityOverride ? lineLayer : startLineLayer;
 
-  Vector3 const noteOffset2 = (noteData->colorType != GlobalNamespace::ColorType::None)
-                                  ? SpawnDataHelper::GetNoteOffset(self, offsetStartRow, offsetStartHeight)
-                                  : (gravityOverride ? SpawnDataHelper::GetNoteOffset(self, lineIndex, lineLayer) : noteOffset);
+  Vector3 const noteOffset = SpawnDataHelper::GetNoteOffset(self, lineIndex, startLineLayer);
+  Vector3 const noteOffset2 =
+      (noteData->colorType != GlobalNamespace::ColorType::None)
+          ? SpawnDataHelper::GetNoteOffset(self, offsetStartRow, offsetStartHeight)
+          : (gravityOverride ? SpawnDataHelper::GetNoteOffset(self, lineIndex, lineLayer) : noteOffset);
 
+  float gravity = SpawnDataHelper::GetGravityBase(lineLayer, gravityOverride ? lineLayer : startLineLayer);
   auto result = NoteSpawnData(noteOffset2, noteOffset2, noteOffset, gravity);
 
   return result;

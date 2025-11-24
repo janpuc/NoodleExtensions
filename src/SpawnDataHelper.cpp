@@ -17,7 +17,7 @@ float SpawnDataHelper::HighestJumpPosYForLineLayer(float lineLayer)
 {
     // Magic numbers below found with linear regression y=mx+b using existing HighestJumpPosYForLineLayer values
 
-    return (0.875f * lineLayer) + 0.639583f + NECaches::JumpOffsetYProvider->jumpOffsetY;
+    return (0.525f * lineLayer) + 0.858333f + NECaches::JumpOffsetYProvider->jumpOffsetY;
 }
 
 float SpawnDataHelper::GetGravityBase(float noteLineLayer, float beforeJumpLineLayer)
@@ -26,5 +26,6 @@ float SpawnDataHelper::GetGravityBase(float noteLineLayer, float beforeJumpLineL
 }
 
 float SpawnDataHelper::LineYPosForLineLayer(float height) {
-  return 0.25f + (height * NECaches::get_noteLinesDistanceFast()); // offset by 0.25
+  return GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kBaseLinesYPos +
+         (height * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance); 
 }
