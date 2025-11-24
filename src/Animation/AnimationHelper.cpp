@@ -229,7 +229,7 @@ ObjectOffset AnimationHelper::GetObjectOffset(AnimationObjectData const& animati
 
   // Apply scale and mirroring
   if (offset.positionOffset)
-    offset.positionOffset = offset.positionOffset.value() * NECaches::get_noteLinesDistanceFast();
+    offset.positionOffset = offset.positionOffset.value() * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
 
   if (NECaches::LeftHandedMode) {
     offset.rotationOffset = Animation::MirrorQuaternionNullable(offset.rotationOffset);

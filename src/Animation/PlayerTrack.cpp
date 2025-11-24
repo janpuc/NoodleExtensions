@@ -10,6 +10,7 @@
 #include "GlobalNamespace/MultiplayerLocalActivePlayerInGameMenuController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnController.hpp"
 #include "GlobalNamespace/BeatmapObjectSpawnMovementData.hpp"
+#include "GlobalNamespace/StaticBeatmapObjectSpawnMovementData.hpp"
 #include "System/Action.hpp"
 #include "NECaches.h"
 
@@ -181,7 +182,7 @@ void PlayerTrack::OnDestroy() {
 
 // V2
 void PlayerTrack::UpdateDataOld() {
-  float noteLinesDistance = NECaches::get_noteLinesDistanceFast();
+  float noteLinesDistance = GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
 
   std::optional<NEVector::Quaternion> rotation = track.GetPropertyNamed(PropertyNames::Rotation).GetQuat();
   std::optional<NEVector::Vector3> position = track.GetPropertyNamed(PropertyNames::Position).GetVec3();
