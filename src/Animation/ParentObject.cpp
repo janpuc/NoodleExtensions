@@ -19,6 +19,30 @@ using namespace UnityEngine;
 using namespace GlobalNamespace;
 using namespace Animation;
 
+template <>
+struct std::hash<std::pair<TrackW, ParentObject*>> {
+  std::size_t operator()(const std::pair<TrackW, ParentObject*>& k) const {
+    return std::hash<int>()(k.first.track._0) ^ std::hash<ParentObject*>()(k.second);
+  }
+};
+// emulate delegates here by associating each Track + Parent to a callback
+// and since callbacks are one time use, we cannot recycle themm when removing them
+// those will cause a crash since they're freed when RemoveGameObjectCallback is called
+static std::unordered_map<std::pair<TrackW, ParentObject*>, TrackW::CWrappedCallback> gameObjectModificationCallbacks;
+
+static void RemoveCallback(TrackW track, ParentObject* object) {
+  auto pair = std::pair(track, object);
+  track.RemoveGameObjectCallback(gameObjectModificationCallbacks[pair]);
+  gameObjectModificationCallbacks.erase(pair);
+}
+
+template<typename F>
+static void AddCallback(TrackW track, ParentObject* object, F&& f) {
+  auto pair = std::pair(track, object);
+  auto callback = track.RegisterGameObjectCallback(std::forward<F>(f));
+  gameObjectModificationCallbacks[pair] = callback;
+}
+
 // Events.cpp
 extern BeatmapObjectSpawnController* spawnController;
 
@@ -142,8 +166,49 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
   Transform* transform = instance->origin;
   NELogger::Logger.debug("Assigning ParentObject {} to [{}] v2 {}", parentTrackEventData.parentTrack.GetName(),
                          fmt::join(parentTrackEventData.childrenTracks |
-                                      std::views::transform([](auto& t) { return std::string(t.GetName()); }),
-                                   ", "), parentTrackEventData.parentTrack.v2);
+                                       std::views::transform([](auto& t) { return std::string(t.GetName()); }),
+                                   ", "),
+                         parentTrackEventData.parentTrack.v2);
+
+  auto startTime = std::chrono::high_resolution_clock::now();
+  parentTrackEventData.parentTrack.RegisterGameObject(parentGameObject);
+
+  for (auto& track : parentTrackEventData.childrenTracks) {
+    if (track == parentTrackEventData.parentTrack) {
+      NELogger::Logger.error("How could a track contain itself?");
+    }
+
+
+    for (auto parentObject : ParentController::parentObjects) {
+      // track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, parentObject };
+      // parentObject->childrenTracks.erase(track);
+
+      // this code is ugly but whatever, keep the original above as a reference
+      if (!parentObject) continue;
+
+      RemoveCallback(track, parentObject);
+
+
+      parentObject->childrenTracks.erase(track);
+    }
+
+    // NELogger::Logger.debug("Reparenting {} from {} to {}", childTrack.GetGameObjects().size(),
+    //                        childTrack.GetName(), parentTrackEventData.parentTrack.GetName());
+    for (auto& gameObject : track.GetGameObjects()) {
+      instance->ParentToObject(get_transform(gameObject));
+    }
+    // instance->childrenTracks.emplace(track);
+    // track.gameObjectModificationEvent += { &ParentObject::HandleGameObject, instance };
+
+    instance->childrenTracks.emplace(track);
+    
+    RemoveCallback(track, instance);
+    AddCallback(track, instance, [instance](UnityEngine::GameObject* go, bool added) {
+      instance->HandleGameObject(instance->track, go, !added);
+    });
+  }
+
+  ParentController::parentObjects.emplace_back(instance);
 
   if (instance->track.v2) {
     if (parentTrackEventData.pos.has_value()) {
@@ -184,38 +249,6 @@ void ParentObject::AssignTrack(ParentTrackEventData const& parentTrackEventData)
       transform->set_localScale(instance->startScale);
     }
   }
-
-
-  auto startTime = std::chrono::high_resolution_clock::now();
-  parentTrackEventData.parentTrack.RegisterGameObject(parentGameObject);
-
-  for (auto& track : parentTrackEventData.childrenTracks) {
-    if (track == parentTrackEventData.parentTrack) {
-      NELogger::Logger.error("How could a track contain itself?");
-    }
-
-    for (auto& parentObject : ParentController::parentObjects) {
-      // track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, parentObject };
-      // parentObject->childrenTracks.erase(track);
-
-      // this code is ugly but whatever, keep the original above as a reference
-      track.RemoveGameObjectCallback(parentObject->gameObjectModificationCallbacks[track]);
-      parentObject->childrenTracks.erase(track);
-    }
-
-    for (auto& gameObject : track.GetGameObjects()) {
-      instance->ParentToObject(get_transform(gameObject));
-    }
-    // instance->childrenTracks.emplace(track);
-    // track.gameObjectModificationEvent += { &ParentObject::HandleGameObject, instance };
-    instance->childrenTracks.emplace(track);
-    auto callback = track.RegisterGameObjectCallback([instance](UnityEngine::GameObject* go, bool added) {
-      instance->HandleGameObject(instance->track, go, !added);
-    });
-    instance->gameObjectModificationCallbacks[track] = callback;
-  }
-
-  ParentController::parentObjects.emplace_back(instance);
 }
 
 void ParentObject::ParentToObject(Transform* transform) {
@@ -251,9 +284,14 @@ ParentObject::~ParentObject() {
   //}
   // just in case
   // track->gameObjectModificationEvent -= { &ParentObject::HandleGameObject, this };
+
+  // ParentController::parentObjects.erase(
+  //     std::remove(ParentController::parentObjects.begin(), ParentController::parentObjects.end(), this),
+  //     ParentController::parentObjects.end());
 }
 
 void ParentController::OnDestroy() {
   NELogger::Logger.debug("Clearing parent objects");
   parentObjects.clear();
+  gameObjectModificationCallbacks.clear();
 }

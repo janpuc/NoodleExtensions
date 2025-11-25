@@ -25,8 +25,6 @@ private:
   bool worldPositionStays;
   TimeUnit lastCheckedTime;
 
-  // callbacks
-  std::unordered_map<TrackW, TrackW::CWrappedCallback> gameObjectModificationCallbacks;
 
 public:
   ~ParentObject();
