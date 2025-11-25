@@ -183,14 +183,6 @@ MAKE_HOOK_MATCH(NoteController_Init, &NoteController::Init, void, NoteController
       transform->set_localRotation(NEVector::Quaternion(transform->get_localRotation()) * localRotation);
     }
   }
-  auto const& tracks = TracksAD::getAD(customNoteData->customData).tracks;
-
-  if (!tracks.empty()) {
-    auto go = self->get_gameObject();
-    for (auto& track : tracks) {
-      track.RegisterGameObject(go);
-    }
-  }
 
   auto scale = NEVector::Vector3(ad.objectData.scaleX.value_or(1.0f), ad.objectData.scaleY.value_or(1.0f),
                                  ad.objectData.scaleZ.value_or(1.0f));

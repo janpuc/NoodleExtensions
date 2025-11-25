@@ -195,15 +195,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   self->_bounds = self->_stretchableObstacle->bounds;
   setBounds();
 
-  auto const& tracks = TracksAD::getAD(obstacleData->customData).tracks;
-
-  if (!tracks.empty()) {
-    auto go = self->get_gameObject();
-    for (auto& track : tracks) {
-      track.RegisterGameObject(go);
-    }
-  }
-
   self->Update();
 }
 
