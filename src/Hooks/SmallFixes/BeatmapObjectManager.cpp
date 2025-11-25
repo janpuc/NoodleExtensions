@@ -19,9 +19,7 @@ using namespace GlobalNamespace;
 using namespace UnityEngine;
 
 static bool GetHiddenForType(BeatmapObjectManager* beatmapObjectManager) {
-  static auto BasicBeatmapObjectManagerKlass = classof(BasicBeatmapObjectManager*);
-
-  if (il2cpp_functions::class_is_assignable_from(BasicBeatmapObjectManagerKlass, beatmapObjectManager->klass)) {
+  if (il2cpp_utils::AssignableFrom<BasicBeatmapObjectManager*>(beatmapObjectManager->klass)) {
     return true;
   }
 
@@ -29,7 +27,8 @@ static bool GetHiddenForType(BeatmapObjectManager* beatmapObjectManager) {
 }
 
 MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle, &BeatmapObjectManager::AddSpawnedObstacleController, void,
-                BeatmapObjectManager* self, GlobalNamespace::ObstacleController* obstacleController, ObstacleSpawnData obstacleSpawnData) {
+                BeatmapObjectManager* self, GlobalNamespace::ObstacleController* obstacleController,
+                ObstacleSpawnData obstacleSpawnData) {
   if (!Hooks::isNoodleHookEnabled())
     return BeatmapObjectManager_SpawnObstacle(self, obstacleController, obstacleSpawnData);
 
@@ -37,20 +36,17 @@ MAKE_HOOK_MATCH(BeatmapObjectManager_SpawnObstacle, &BeatmapObjectManager::AddSp
     return;
   }
   self->SetObstacleEventCallbacks(obstacleController);
-  auto action = self->obstacleWasSpawnedEvent;
-  if (action != nullptr) {
-    action->Invoke(obstacleController);
-  }
-  auto action2 = self->obstacleWasAddedEvent;
-  if (action2 != nullptr) {
-    action2->Invoke(obstacleController->obstacleData, obstacleSpawnData,
-                    (float)obstacleController->obstacleData->rotation);
-  }
+  if (self->obstacleWasSpawnedEvent) self->obstacleWasSpawnedEvent->Invoke(obstacleController);
+
+  if (self->obstacleWasAddedEvent)
+    self->obstacleWasAddedEvent->Invoke(obstacleController->obstacleData, obstacleSpawnData,
+                                        obstacleController->obstacleData->rotation);
+
+  self->_allBeatmapObjects->Add(obstacleController->i___GlobalNamespace__IBeatmapObjectController());
   obstacleController->ManualUpdate();
   // TRANSPILE HERE
   obstacleController->Hide(GetHiddenForType(self));
-  ///
-  self->_allBeatmapObjects->Add(reinterpret_cast<IBeatmapObjectController*>(obstacleController));
+  //
 
   // POST FIX
   auto customObstacleData =

@@ -171,13 +171,6 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   ad.internalScale = scale;
   transform->set_localScale(scale);
 
-  // Store start/mid/end positions similar to C# LATEST behavior. Use the spawnData moveOffset
-  // as the internal start position so position offsets are applied relative to the spawn offset.
-  ad.moveStartPos = obstacleSpawnData->moveOffset;
-  // ad.moveEndPos = self->_midPos;
-  // ad.jumpEndPos = self->_endPos;
-  ad.localRotation = ad.objectData.localRotation.value_or(NEVector::Quaternion::identity());
-
   // GetCustomWidth transpiler
   if (ad.objectData.width) {
     self->_width = *ad.objectData.width * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
@@ -186,6 +179,10 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   if (ad.objectData.length) {
     self->_length = *ad.objectData.length * StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
   }
+
+  ad.moveStartPos = obstacleSpawnData->moveOffset;
+  // ad.moveEndPos = self->_midPos;
+  // ad.jumpEndPos = self->_endPos;
 
   // Note offset is jumpEndPosition + spawn move offset (z removed), matching C# LATEST
   Vector3 noteOffset =
@@ -490,7 +487,6 @@ MAKE_HOOK_MATCH(ObstacleController_GetObstacleLength, &ObstacleController::GetOb
 
   BeatmapObjectAssociatedData const& ad = getAD(obstacleData->customData);
 
-
   if (ad.objectData.length) {
     return *ad.objectData.length * GlobalNamespace::StaticBeatmapObjectSpawnMovementData::kNoteLinesDistance;
   }
@@ -537,6 +533,7 @@ void InstallObstacleControllerHooks() {
 
   // Fixes glow being too large on small walls.
   INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_Refresh);
+
   // Uncomment to disable fake glow.
   // INSTALL_HOOK(NELogger::Logger, ParametricBoxFakeGlowController_OnEnable);
 
