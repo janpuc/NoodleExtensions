@@ -44,9 +44,12 @@ MAKE_HOOK_MATCH(InstallBindings, &GameplayCoreInstaller::InstallBindings, void, 
   //     il2cpp_utils::cast<CustomJSONData::CustomBeatmapData>(self->_sceneSetupData->get_transformedBeatmapData());
 
   NECaches::JumpOffsetYProvider = self->Container->Resolve<GlobalNamespace::IJumpOffsetYProvider*>();
-  NECaches::VariableMovementDataProvider = self->Container->Resolve<GlobalNamespace::VariableMovementDataProvider*>();
   NECaches::InitData = self->Container->Resolve<GlobalNamespace::BeatmapObjectSpawnController::InitData*>();
+
+    // force it to start and set the variable
   NECaches::beatmapObjectSpawnController = self->Container->Resolve<GlobalNamespace::BeatmapObjectSpawnController*>();
+  NECaches::VariableMovementDataProvider = self->Container->Resolve<GlobalNamespace::VariableMovementDataProvider*>();
+  NECaches::beatmapObjectSpawnController->Start();
 
   NECaches::noodleMovementDataProviderPool =
       std::make_shared<NoodleExtensions::Pool::NoodleMovementDataProviderPool>(75);

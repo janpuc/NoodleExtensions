@@ -159,9 +159,7 @@ float NoodleExtensions::NoodleMovementDataProvider::JumpPosYForLineLayerAtDistan
 }
 
 void NoodleExtensions::NoodleMovementDataProvider::ctor() {
-  beatmapObjectSpawnMovementData = GlobalNamespace::BeatmapObjectSpawnMovementData::New_ctor();
-  beatmapObjectSpawnMovementData->Init(NECaches::numberOfLines, NECaches::JumpOffsetYProvider.ptr(),
-                                       NEVector::Vector3::right());
+  beatmapObjectSpawnMovementData = NECaches::beatmapObjectSpawnController->_beatmapObjectSpawnMovementData;
 
   // initialize base data
   // TODO: Check if we need more initialization
