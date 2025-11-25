@@ -32,7 +32,7 @@ static GlobalNamespace::IReadonlyBeatmapData* beatmapData;
 static BeatmapObjectSpawnController::InitData* initData;
 static GlobalNamespace::BeatmapObjectSpawnMovementData* movementData;
 
-inline float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData,
+static float GetSpawnAheadTime(BeatmapObjectSpawnController::InitData* initData,
                                BeatmapObjectSpawnMovementData* movementData, std::optional<float> inputNjs,
                                std::optional<float> inputOffset) {
   float const moveDuration = GlobalNamespace::VariableMovementDataProvider::kMoveDuration;

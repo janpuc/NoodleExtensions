@@ -9,8 +9,7 @@
 DEFINE_TYPE(NoodleExtensions, NoodleMovementDataProvider);
 
 NoodleExtensions::NoodleMovementDataProvider*
-NoodleExtensions::NoodleMovementDataProvider::InitObject(GlobalNamespace::BeatmapObjectData* beatmapObjectData,
-                                                         GlobalNamespace::IVariableMovementDataProvider* original) {
+NoodleExtensions::NoodleMovementDataProvider::InitObject(GlobalNamespace::BeatmapObjectData* beatmapObjectData) {
   jumpDistanceOverride = std::nullopt;
   jumpDurationOverride = std::nullopt;
   halfJumpDurationOverride = std::nullopt;
@@ -19,13 +18,7 @@ NoodleExtensions::NoodleMovementDataProvider::InitObject(GlobalNamespace::Beatma
   moveStartPositionOverride = std::nullopt;
   moveEndPositionOverride = std::nullopt;
   jumpEndPositionOverride = std::nullopt;
-  if (!this->original) {
-    this->original.emplace(nullptr);
-  }
 
-  if (original) {
-    this->original = original;
-  }
   static auto* customObstacleDataClass = classof(CustomJSONData::CustomObstacleData*);
   static auto* customNoteDataClass = classof(CustomJSONData::CustomNoteData*);
   static auto* customSliderDataClass = classof(CustomJSONData::CustomSliderData*);
@@ -160,6 +153,7 @@ float NoodleExtensions::NoodleMovementDataProvider::JumpPosYForLineLayerAtDistan
 
 void NoodleExtensions::NoodleMovementDataProvider::ctor() {
   beatmapObjectSpawnMovementData = NECaches::beatmapObjectSpawnController->_beatmapObjectSpawnMovementData;
+  original.emplace(NECaches::VariableMovementDataProvider.ptr());
 
   // initialize base data
   // TODO: Check if we need more initialization

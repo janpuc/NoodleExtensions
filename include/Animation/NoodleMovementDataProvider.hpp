@@ -3,6 +3,7 @@
 #include "Animation/PlayerTrack.h"
 #include "custom-types/shared/macros.hpp"
 #include "GlobalNamespace/IVariableMovementDataProvider.hpp"
+#include "GlobalNamespace/VariableMovementDataProvider.hpp"
 #include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "System/Object.hpp"
 
@@ -10,8 +11,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(NoodleExtensions, NoodleMovementDataProvider, S
   DECLARE_CTOR(ctor);
 
   DECLARE_INSTANCE_METHOD(NoodleMovementDataProvider*, InitObject,
-                          GlobalNamespace::BeatmapObjectData * beatmapObjectData,
-                          GlobalNamespace::IVariableMovementDataProvider * original);
+                          GlobalNamespace::BeatmapObjectData * beatmapObjectData);
 
   DECLARE_OVERRIDE_METHOD_MATCH(bool, get_wasUpdatedThisFrame, &GlobalNamespace::IVariableMovementDataProvider::get_wasUpdatedThisFrame);
   DECLARE_OVERRIDE_METHOD_MATCH(float, get_jumpDistance, &GlobalNamespace::IVariableMovementDataProvider::get_jumpDistance);
@@ -48,7 +48,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(NoodleExtensions, NoodleMovementDataProvider, S
 public:
   DECLARE_SIMPLE_DTOR();
   
-  SafePtr<GlobalNamespace::IVariableMovementDataProvider> original;
+  SafePtr<GlobalNamespace::VariableMovementDataProvider> original;
   SafePtr<GlobalNamespace::BeatmapObjectSpawnMovementData> beatmapObjectSpawnMovementData;
   float noteJumpStartBeatOffset;
   float oneBeatDuration;
