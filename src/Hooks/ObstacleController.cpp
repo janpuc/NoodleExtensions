@@ -106,17 +106,18 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
     return;
   }
 
-  ArrayW<ConditionalMaterialSwitcher*>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
-  if (!materialSwitchers) {
-    materialSwitchers = self->GetComponentsInChildren<ConditionalMaterialSwitcher*>();
-  }
+  //   // TODO: reimplement smarter dissolve enabling based on color alpha and brightness
+  // ArrayW<ConditionalMaterialSwitcher*>& materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
+  // if (!materialSwitchers) {
+  //   materialSwitchers = self->GetComponentsInChildren<ConditionalMaterialSwitcher*>();
+  // }
 
-  // Reset only if NE dissolve is enabled
-  if (getNEConfig().enableObstacleDissolve.GetValue()) {
-    for (auto* materialSwitcher : materialSwitchers) {
-      materialSwitcher->_renderer->set_sharedMaterial(materialSwitcher->_material0);
-    }
-  }
+  // // Reset only if NE dissolve is enabled
+  // if (getNEConfig().enableObstacleDissolve.GetValue()) {
+  //   for (auto* materialSwitcher : materialSwitchers) {
+  //     materialSwitcher->_renderer->set_sharedMaterial(materialSwitcher->_material0);
+  //   }
+  // }
   obstacleCache.dissolveEnabled = false;
 
   auto const setBounds = [&ad, &self]() constexpr {
@@ -346,17 +347,19 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
   auto& obstacleCache = NECaches::getObstacleCache(self);
 
-  if (obstacleCache.cachedData != self->obstacleData) {
-    obstacleCache.cachedData = self->obstacleData;
-    // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably
-    // redundantly)
-    auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
-    if (color) {
-      obstacleCache.color = *color;
-    } else {
-      obstacleCache.color = std::nullopt;
-    }
-  }
+    //   // TODO: reimplement smarter dissolve enabling based on color alpha and brightness
+
+  // if (obstacleCache.cachedData != self->obstacleData) {
+  //   obstacleCache.cachedData = self->obstacleData;
+  //   // Obstacles are pooled. Clear obstacle when initialized if it's not colored or update to its new color (probably
+  //   // redundantly)
+  //   auto color = Chroma::ObstacleAPI::getObstacleControllerColorSafe(self);
+  //   if (color) {
+  //     obstacleCache.color = *color;
+  //   } else {
+  //     obstacleCache.color = std::nullopt;
+  //   }
+  // }
 
   bool obstacleDissolveConfig = getNEConfig().enableObstacleDissolve.GetValue();
   if (offset.dissolve.has_value()) {
@@ -371,33 +374,34 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     bool wasEnabled = obstacleCache.dissolveEnabled;
     obstacleCache.dissolveEnabled = obstacleDissolveConfig;
 
-    if (obstacleCache.dissolveEnabled) {
-      if (getNEConfig().materialBehaviour.GetValue() == (int)MaterialBehaviour::BASIC) {
-        obstacleCache.dissolveEnabled |= dissolve > 0.0f;
-      } else {
-        bool transparent = true;
+    //   // TODO: reimplement smarter dissolve enabling based on color alpha and brightness
+    // if (obstacleCache.dissolveEnabled) {
+    //   if (getNEConfig().materialBehaviour.GetValue() == (int)MaterialBehaviour::BASIC) {
+    //     obstacleCache.dissolveEnabled |= dissolve > 0.0f;
+    //   } else {
+    //     bool transparent = true;
 
-        if (getNEConfig().materialBehaviour.GetValue() == (int)MaterialBehaviour::SMART_COLOR) {
-          auto const& colorIt = obstacleCache.color;
+    //     if (getNEConfig().materialBehaviour.GetValue() == (int)MaterialBehaviour::SMART_COLOR) {
+    //       auto const& colorIt = obstacleCache.color;
 
-          // multiply rgb by alpha?
-          if (colorIt &&
-              (colorIt->a > 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).Magnitude() >= 1)) {
-            transparent = false;
-          }
-        }
+    //       // multiply rgb by alpha?
+    //       if (colorIt &&
+    //           (colorIt->a > 1.0f || NEVector::Vector3(colorIt->r, colorIt->g, colorIt->b).Magnitude() >= 1)) {
+    //         transparent = false;
+    //       }
+    //     }
 
-        if (transparent) obstacleCache.dissolveEnabled = dissolve > 0.0f;
-      }
-    }
+    //     if (transparent) obstacleCache.dissolveEnabled = dissolve > 0.0f;
+    //   }
+    // }
 
-    if (wasEnabled != obstacleCache.dissolveEnabled) {
-      ArrayW<ConditionalMaterialSwitcher*> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
-      for (auto* materialSwitcher : materialSwitchers) {
-        materialSwitcher->_renderer->set_sharedMaterial(obstacleCache.dissolveEnabled ? materialSwitcher->_material1
-                                                                                      : materialSwitcher->_material0);
-      }
-    }
+    // if (wasEnabled != obstacleCache.dissolveEnabled) {
+    //   ArrayW<ConditionalMaterialSwitcher*> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
+    //   for (auto* materialSwitcher : materialSwitchers) {
+    //     materialSwitcher->_renderer->set_sharedMaterial(obstacleCache.dissolveEnabled ? materialSwitcher->_material1
+    //                                                                                   : materialSwitcher->_material0);
+    //   }
+    // }
 
     CutoutAnimateEffect*& cutoutAnimationEffect = obstacleCache.cutoutAnimateEffect;
     if (!cutoutAnimationEffect) {
