@@ -218,40 +218,37 @@ static void ObstacleController_ManualUpdateTranspile(ObstacleController* self, f
     self->_endPos =
         NEVector::Vector3(self->_variableMovementDataProvider->jumpEndPosition) + self->_obstacleSpawnData.moveOffset;
   }
-
   // TRANSPILE HERE
-  float num = elapsedTime;
+  float num = elapsedTime; // self->_audioTimeSyncController->songTime - self->_startTimeOffset;
   // TRANSPILE HERE
-
   NEVector::Vector3 posForTime = self->GetPosForTime(num);
-  self->get_transform()->set_localPosition(NEVector::Quaternion(self->_worldRotation) * posForTime);
+  self->transform->localPosition = NEVector::Quaternion(self->_worldRotation) * posForTime;
   self->_length = self->GetObstacleLength();
   if (self->_variableMovementDataProvider->wasUpdatedThisFrame) {
     self->_stretchableObstacle->SetSizeAndOffset(self->_width, self->_height, self->_length,
                                                  self->_audioTimeSyncController->songTime);
   }
-
   auto action = self->didUpdateProgress;
-  if (action) {
+  if (action != nullptr) {
     action->Invoke(self, num);
   }
   if (!self->_passedThreeQuartersOfJumpDurationReported && num > self->_passedThreeQuartersOfJumpDurationTime) {
     self->_passedThreeQuartersOfJumpDurationReported = true;
     auto action2 = self->passedThreeQuartersOfJumpDurationEvent;
-    if (action2) {
+    if (action2 != nullptr) {
       action2->Invoke(self);
     }
   }
   if (!self->_passedAvoidedMarkReported && num > self->_passedAvoidedMarkTime) {
     self->_passedAvoidedMarkReported = true;
     auto action3 = self->passedAvoidedMarkEvent;
-    if (action3) {
+    if (action3 != nullptr) {
       action3->Invoke(self);
     }
   }
   if (num > self->_finishMovementTime) {
     auto action4 = self->finishedMovementEvent;
-    if (!action4) {
+    if (action4 == nullptr) {
       return;
     }
     action4->Invoke(self);
@@ -347,7 +344,7 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
 
   auto& obstacleCache = NECaches::getObstacleCache(self);
 
-    //   // TODO: reimplement smarter dissolve enabling based on color alpha and brightness
+  //   // TODO: reimplement smarter dissolve enabling based on color alpha and brightness
 
   // if (obstacleCache.cachedData != self->obstacleData) {
   //   obstacleCache.cachedData = self->obstacleData;
@@ -399,7 +396,8 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
     //   ArrayW<ConditionalMaterialSwitcher*> materialSwitchers = obstacleCache.conditionalMaterialSwitchers;
     //   for (auto* materialSwitcher : materialSwitchers) {
     //     materialSwitcher->_renderer->set_sharedMaterial(obstacleCache.dissolveEnabled ? materialSwitcher->_material1
-    //                                                                                   : materialSwitcher->_material0);
+    //                                                                                   :
+    //                                                                                   materialSwitcher->_material0);
     //   }
     // }
 
@@ -414,9 +412,9 @@ MAKE_HOOK_MATCH(ObstacleController_ManualUpdate, &ObstacleController::ManualUpda
   }
 
   // do transpile only if needed
-
+  // TODO: Figure out why this transpile doesn't work when time is unchanged
   auto animatedTimeAdjusted = obstacleTimeAdjust(self, elapsedTime, tracks);
-  if (animatedTimeAdjusted != elapsedTime) {
+  if (std::abs(obstacleOriginalTime - normalTime) > std::numeric_limits<float>::epsilon()) {
     return ObstacleController_ManualUpdateTranspile(self, animatedTimeAdjusted);
   }
   return ObstacleController_ManualUpdate(self);
