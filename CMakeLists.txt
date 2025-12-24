@@ -15,7 +15,7 @@ message("Building ${COMPILE_ID} version ${MOD_VERSION} with ID ${MOD_ID} ${CMAKE
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
         message("Release build")
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-        add_compile_options(-O3)
+        add_compile_options(-O3 -flto)
 else()
         message("Debug build")
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
