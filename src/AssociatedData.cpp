@@ -63,7 +63,11 @@ ObjectCustomData::ObjectCustomData(rapidjson::Value const& customData, CustomJSO
   uninteractable = NEJSON::ReadOptionalBool(customData, v2 ? NoodleExtensions::Constants::V2_CUTTABLE
                                                            : NoodleExtensions::Constants::UNINTERACTABLE);
 
-  uninteractable = v2 ? !uninteractable.value_or(true) : uninteractable;
+  if (v2 && uninteractable.has_value()) {
+    // In v2, uninteractable is the inverse of cuttable
+    // only set value if it exists
+    uninteractable = !uninteractable.value();
+  }
 
   if (noteData && fake.value_or(false)) {
     noteData->set_scoringType(GlobalNamespace::NoteData::ScoringType::NoScore);

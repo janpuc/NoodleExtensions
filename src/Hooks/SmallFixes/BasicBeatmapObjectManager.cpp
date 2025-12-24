@@ -12,6 +12,7 @@
 using namespace GlobalNamespace;
 using namespace UnityEngine;
 
+// added to by ObstacleController Init
 SafePtr<System::Collections::Generic::List_1<UnityW<ObstacleController>>>& getActiveObstacles();
 
 MAKE_HOOK_MATCH(BasicBeatmapObjectManager_Init, &BasicBeatmapObjectManager::Init, void, BasicBeatmapObjectManager* self,

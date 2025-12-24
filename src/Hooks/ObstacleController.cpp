@@ -80,6 +80,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   transform->set_localScale(NEVector::Vector3::one());
 
   if (!obstacleData->customData) {
+    NELogger::Logger.warn("Obstacle at time {} has no customData", obstacleData->time);
     return;
   }
 
@@ -123,6 +124,7 @@ MAKE_HOOK_MATCH(ObstacleController_Init, &ObstacleController::Init, void, Obstac
   auto const setBounds = [&ad, &self]() constexpr {
     if (ad.objectData.uninteractable.value_or(false)) {
       self->bounds.set_size(NEVector::Vector3::zero());
+      getActiveObstacles()->Remove(self);
     } else {
       getActiveObstacles()->Add(self);
     }
