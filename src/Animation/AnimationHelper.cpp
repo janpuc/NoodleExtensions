@@ -137,26 +137,27 @@ ObjectOffset AnimationHelper::GetObjectOffset(AnimationObjectData const& animati
     if (tracks.size() == 1) {
       auto const track = tracks.front();
 
-      // Macros to simplify getter code
-      if (!pathPosition) pathPosition = track.GetPathPropertyNamed(PropertyNames::Position).InterpolateVec3(time);
-      if (!pathRotation) pathRotation = track.GetPathPropertyNamed(PropertyNames::Rotation).InterpolateQuat(time);
-      if (!pathScale) pathScale = track.GetPathPropertyNamed(PropertyNames::Scale).InterpolateVec3(time);
-      if (!pathLocalRotation)
-        pathLocalRotation = track.GetPathPropertyNamed(PropertyNames::LocalRotation).InterpolateQuat(time);
+      auto pathProperties = track.GetPathPropertiesMapW();
+      auto properties = track.GetPropertiesMapW();
 
-      if (!pathDissolve) pathDissolve = track.GetPathPropertyNamed(PropertyNames::Dissolve).InterpolateLinear(time);
-      if (!pathDissolveArrow)
-        pathDissolveArrow = track.GetPathPropertyNamed(PropertyNames::DissolveArrow).InterpolateLinear(time);
-      if (!pathCuttable) pathCuttable = track.GetPathPropertyNamed(PropertyNames::Cuttable).InterpolateLinear(time);
+      // Macros to simplify getter code
+      if (!pathPosition) pathPosition = pathProperties.position.InterpolateVec3(time);
+      if (!pathRotation) pathRotation = pathProperties.rotation.InterpolateQuat(time);
+      if (!pathScale) pathScale = pathProperties.scale.InterpolateVec3(time);
+      if (!pathLocalRotation) pathLocalRotation = pathProperties.localRotation.InterpolateQuat(time);
+
+      if (!pathDissolve) pathDissolve = pathProperties.dissolve.InterpolateLinear(time);
+      if (!pathDissolveArrow) pathDissolveArrow = pathProperties.dissolveArrow.InterpolateLinear(time);
+      if (!pathCuttable) pathCuttable = pathProperties.cuttable.InterpolateLinear(time);
 
       // Combine with track properties
-      offset.positionOffset = pathPosition + track.GetPropertyNamed(PropertyNames::Position).GetVec3();
-      offset.rotationOffset = pathRotation * track.GetPropertyNamed(PropertyNames::Rotation).GetQuat();
-      offset.scaleOffset = pathScale * track.GetPropertyNamed(PropertyNames::Scale).GetVec3();
-      offset.localRotationOffset = pathLocalRotation * track.GetPropertyNamed(PropertyNames::LocalRotation).GetQuat();
-      offset.dissolve = pathDissolve * track.GetPropertyNamed(PropertyNames::Dissolve).GetFloat();
-      offset.dissolveArrow = pathDissolveArrow * track.GetPropertyNamed(PropertyNames::DissolveArrow).GetFloat();
-      offset.cuttable = pathCuttable * track.GetPropertyNamed(PropertyNames::Cuttable).GetFloat();
+      offset.positionOffset = pathPosition + properties.position.GetVec3();
+      offset.rotationOffset = pathRotation * properties.rotation.GetQuat();
+      offset.scaleOffset = pathScale * properties.scale.GetVec3();
+      offset.localRotationOffset = pathLocalRotation * properties.localRotation.GetQuat();
+      offset.dissolve = pathDissolve * properties.dissolve.GetFloat();
+      offset.dissolveArrow = pathDissolveArrow * properties.dissolveArrow.GetFloat();
+      offset.cuttable = pathCuttable * properties.cuttable.GetFloat();
     } else {
       // Multiple tracks - combine their properties
       if (!pathPosition) {
